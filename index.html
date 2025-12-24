@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html> 
+  <head>
+    <title>Liquid Dots</title> 
+  </head>
+  <body>
+	<!--Made by AiluroFelinus -->
+    <canvas id="mycanvas"></canvas> 
+  </body>
+ 
+  <script src="https://cdn.jsdelivr.net/processing.js/1.4.8/processing.min.js"></script> 
+  <script>
+  var programCode = function(processingInstance) {
+    with (processingInstance) {
+      size(400, 400); 
+      frameRate(30);
+        
+     angleMode="degrees";
+var drops = [];
+strokeWeight(10);
+var dropsCount=64;
+var drop = function(pos,veloz){
+    this.pos=pos;
+    this.x=pos.x;
+    this.y=pos.y;
+    this.force=new PVector(0,0);
+    this.veloz=veloz;
+    this.color=color(random(0,255),random(0,255),random(0,255));
+    this.paint=function(){
+        stroke(this.color);
+        point(this.x,this.y);
+    };
+    this.move=function(){
+        for(var i=0;i<drops.length;i++){
+            if(i===0){
+                this.forces=[];
+            }
+            var px = drops[i].x+width;
+            var mx = drops[i].x-width;
+            var py = drops[i].y+height;
+            var my = drops[i].y-height;
+            var distnorm = dist(drops[i].x,drops[i].y,this.x,this.y);
+            var distpx = dist(px,drops[i].y,this.x,this.y);
+            var distmx = dist(mx,drops[i].y,this.x,this.y);
+            var distpy = dist(drops[i].x,py,this.x,this.y);
+            var distmy = dist(drops[i].x,my,this.x,this.y);
+            var distpxpy = dist(px,py,this.x,this.y);
+            var distpxmy = dist(px,my,this.x,this.y);
+            var distmxpy = dist(mx,py,this.x,this.y);
+            var distmxmy = dist(mx,my,this.x,this.y);
+            var dropdist = Math.min(distnorm,distpx,distmx,distpy,distmy,distpxpy,distpxmy,distmxpy,distmxmy);
+            var posi = new PVector(0,0);
+            if(dropdist!==0){
+            if(dropdist===distnorm){posi.set(drops[i].x,drops[i].y);}
+            if(dropdist===distpx){posi.set(px,drops[i].y);}
+            if(dropdist===distmx){posi.set(mx,drops[i].y);}
+            if(dropdist===distpy){posi.set(drops[i].x,py);}
+            if(dropdist===distmy){posi.set(drops[i].x,my);}
+            if(dropdist===distpxpy){posi.set(px,py);}
+            if(dropdist===distpxmy){posi.set(px,my);}
+            if(dropdist===distmxpy){posi.set(mx,py);}
+            if(dropdist===distmxmy){posi.set(mx,my);}
+            var angle = asin((posi.y-this.y)/sqrt(sq(posi.x-this.x)+sq(posi.y-this.y)));
+            var psub = new PVector();
+            psub.set(PVector.sub(this.pos,posi));
+            var angle = psub.heading();
+            var speed = 1/dropdist;
+            this.forces.push(new PVector(speed*cos(angle),speed*(sin(angle))));
+            }else{this.forces.push(new PVector(0,0));}
+            var accumulatorV=new PVector(0,0);
+            if(i===drops.length-1){
+                for(var j=0;j<this.forces.length;j++){
+                    if(j===0){
+                        var accumulatorV=(this.forces[j]);
+                    }else{
+                        accumulatorV.add(this.forces[j]);
+                    }
+                }
+            }
+            this.veloz.add(accumulatorV);
+            this.veloz.mult(0.9);
+            this.pos = new PVector(this.x,this.y);
+            this.pos.add(this.veloz);
+            this.x=this.pos.x;
+            this.y=this.pos.y;
+            if(this.x>width){this.x=this.x-width;}
+            if(this.x<0){this.x=this.x+width;}
+            if(this.y>height){this.y=this.y-height;}
+            if(this.y<0){this.y=this.y+height;}
+        }
+    };
+    };
+/*var drip=new drop(new PVector(10,10),new PVector(0,0));
+var droop=new drop(new PVector(20,20),new PVector(0,0));
+drops.push(drip);
+drops.push(droop);
+draw = function() {
+    drip.move();
+    droop.move();
+    drip.paint();
+    droop.paint();
+};*/
+for(var i=0;i<dropsCount;i++){
+    drops.push(new drop(new PVector(random(0,width),random(0,height)),new PVector(0,0)));
+}
+draw= function() {
+    background(255,255,255);
+    for(var i=0;i<drops.length;i++){
+        drops[i].move();
+        drops[i].paint();
+    }
+};
+
+  // Get the canvas that ProcessingJS will use
+  var canvas = document.getElementById("mycanvas"); 
+  // Pass the function to ProcessingJS constructor
+  var processingInstance = new Processing(canvas, programCode); 
+  </script>
+</html>
